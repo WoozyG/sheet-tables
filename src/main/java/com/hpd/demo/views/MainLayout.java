@@ -1,6 +1,6 @@
 package com.hpd.demo.views;
 
-import com.hpd.demo.views.spreadsheettablesonmultiplesheets.SpreadSheetTablesOnMultipleSheetsView;
+import com.hpd.demo.views.spreadsheettablesonmultiplesheets.SpreadSheetView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Footer;
@@ -51,7 +51,7 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         nav.addItem(new SideNavItem("SpreadSheet Tables On Multiple Sheets",
-                SpreadSheetTablesOnMultipleSheetsView.class, LineAwesomeIcon.CHART_BAR.create()));
+                SpreadSheetView.class, LineAwesomeIcon.CHART_BAR.create()));
 
         return nav;
     }

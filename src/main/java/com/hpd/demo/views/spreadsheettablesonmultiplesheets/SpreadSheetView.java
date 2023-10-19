@@ -1,5 +1,37 @@
 package com.hpd.demo.views.spreadsheettablesonmultiplesheets;
 
+import java.awt.Color;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.RichTextString;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.hpd.demo.HpdDemoSpreadsheet;
 import com.hpd.demo.views.MainLayout;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -32,54 +64,42 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import java.awt.Color;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Comment;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Drawing;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.RichTextString;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * view.
+ * 
+ * Bugs:
+ * <ol>
+ * <li> SpreadsheetFilterTable instances are created and registered every time a sheet is activated, but never deleted.
+ * <li> SpreadsheetFilterTable doesn't reference the POI Table object it is built from
+ * <li> SpreadsheetFilterTable doesn't respect Excel enable/disable table filters setting 
+ * 			(ctrl-shift-L shortcut in Excel, or Filter button in "Sort & Filter" group on Data ribbon tab)
+ * <li> Spreadsheet.reload() recreates popup buttons even if they've been deleted - no way to NOT have them
+ * <li> popups still displayed in the UI even if setVisible(false) and setHeaderHidden(true) are called.
+ */
 @PageTitle("SpreadSheet Tables On Multiple Sheets")
 @Route(value = "", layout = MainLayout.class)
-public class SpreadSheetTablesOnMultipleSheetsView extends VerticalLayout implements Receiver {
+public class SpreadSheetView extends VerticalLayout implements Receiver {
+	private static final long serialVersionUID = 1L;
 
-    private File uploadedFile;
+	private File uploadedFile;
     private File previousFile;
     private final Spreadsheet spreadsheet;
     private H3 invoiceNumber;
     private Span invoiceSource;
 
-    public SpreadSheetTablesOnMultipleSheetsView() throws IOException, URISyntaxException {
+    /**
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    public SpreadSheetView() throws IOException, URISyntaxException {
         setSizeFull();
         setPadding(false);
         setSpacing(false);
 
         InputStream stream = getClass().getResourceAsStream("/simple-invoice.xlsx");
 
-        spreadsheet = new Spreadsheet(stream);
+        spreadsheet = new HpdDemoSpreadsheet(stream);
         spreadsheet.setHeight("400px");
         add(spreadsheet);
 
